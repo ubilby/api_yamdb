@@ -85,11 +85,15 @@ class Reviews(models.Model):
     text = models.TextField(
         'Текст отзыва',
         help_text='Введите отзыв',
-        max_length=200
+        required=True
     )
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата публикации отзыва',
         auto_now_add=True,
+    )
+    score = models.IntegerField(
+        required=True
+        # дописать разрешенный интервал оценок 1-10
     )
 
     class Meta:
