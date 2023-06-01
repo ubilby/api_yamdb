@@ -16,3 +16,73 @@ class MyUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+# class Category(models):
+#     name = models.CharField(max_length=256, unique=True)
+#     slug = models.SlugField(max_length=50, r^[-a-zA-Z0-9_]+$)
+
+
+
+# class Genre(models.Model):
+#     name = models.CharField(max_length=200, unique=True)
+#     slug = models.CharField(max_length=50, r^[-a-zA-Z0-9_]+$)
+
+
+# class Title(models.Model):
+#     name = models.CharField(max_length=256, required=True)
+#     year = models.IntegerField(required=True)
+#     description = models.CharField
+#     category = models.ForeignKey(
+#         Category,
+#         on_delete=models.SET_NULL,
+#         required=True,
+#         related_name='titles',
+#         verbose_name='Категория',
+#     )
+#     genre = models.ForeignKey(
+#         Genre,
+#         on_delete=models.SET_NULL,
+#         required=True,
+#         related_name='genres',
+#         verbose_name='Жанр',
+#     )
+
+#     class Meta:
+#         verbose_name = 'Произведение'
+#         verbose_name_plural = 'Произведения'
+
+#     def __str__(self) -> str:
+#         return self.title
+
+
+# class Reviews(models.Model):
+#     title = models.ForeignKey(
+#         Title,
+#         on_delete=models.CASCADE,
+#         related_name='reviews',
+#         verbose_name='Отзыв',
+#     )
+#     author = models.ForeignKey(
+#         MyUser,
+#         on_delete=models.CASCADE,
+#         related_name='reviews',
+#         verbose_name='Автор',
+#     )
+#     text = models.TextField(
+#         'Текст отзыва',
+#         help_text='Введите отзыв',
+#         max_length=200
+#     )
+#     created = models.DateTimeField(
+#         'Дата публикации отзыва',
+#         auto_now_add=True,
+#     )
+
+#     class Meta:
+#         verbose_name = 'Отзыв'
+#         verbose_name_plural = 'Отзывы'
+#         ordering = ('-created',)
+
+#     def __str__(self):
+#         return self.text
