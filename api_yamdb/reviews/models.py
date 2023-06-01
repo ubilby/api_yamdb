@@ -18,15 +18,28 @@ class MyUser(AbstractUser):
         return self.username
 
 
-class Category(models):
-    name = models.CharField(max_length=256, unique=True)
-    slug = models.SlugField(max_length=50, r^[-a-zA-Z0-9_]+$)
+class Category(models.Model):
+    name = models.CharField(max_length=256, required=True)
+    slug = models.SlugField(max_length=50, required=True, unique=True)
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    slug = models.CharField(max_length=50, r^[-a-zA-Z0-9_]+$)
+    name = models.CharField(max_length=200, required=True)
+    slug = models.SlugField(max_length=50, required=True, unique=True)
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
@@ -53,7 +66,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
     def __str__(self) -> str:
-        return self.title
+        return self.name
 
 
 class Reviews(models.Model):
