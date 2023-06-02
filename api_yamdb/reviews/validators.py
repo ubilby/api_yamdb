@@ -3,8 +3,7 @@ from django.utils import timezone
 
 
 def validate_year(creation_year):
-    now = timezone.now().year
-    if creation_year > now:
+    if creation_year > timezone.now().year:
         raise ValidationError(
-            f'{creation_year} не может быть больше {now}'
+            f'Год не может быть больше {timezone.now().year}'
         )
