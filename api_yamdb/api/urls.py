@@ -3,19 +3,20 @@ from rest_framework.routers import DefaultRouter
 
 from .views import CategoryViewSet, GenreViewSet, TitleViewSet
 
-router = DefaultRouter()
+app_name = 'api'
+router_v1 = DefaultRouter()
 
-router.register('category', CategoryViewSet, basename='category')
-router.register(
-    r'reviews/(?P<title_id>\d+)/comments',
-    CommentViewSet,
-    basename='comments'
+router_v1.register('/categories/', CategoryViewSet, basename='category')
+router_v1.register('/genres/', GenreViewSet, basename='genres')
+router_v1.register('/titles/', TitleViewSet, basename='titles')
+router_v1.register(
+    r'titles/(?P<title_id>\d{1,})/',
+    TitleViewSet,
+    basename='titles',
 )
-router.register('genres', GenreViewSet, basename='genres')
-router.register('titles', TitleViewSet, basename='titles')
 
 urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-    path('/', include(router.urls)),
+    path('', include(router_v1.urls)),
 ]
