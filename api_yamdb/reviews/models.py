@@ -62,6 +62,13 @@ class Title(models.Model):
         null=True
     )
 
+    def save(self, *args, **kwargs):
+        created = not self.pk  # Проверяем, является ли экземпляр новым
+        super().save(*args, **kwargs)  # Сохраняем экземпляр Title
+
+        if created:  # Если экземпляр был только что создан
+            Rating.objects.create(title=self, average_score=0.0)
+
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
@@ -95,6 +102,20 @@ class Review(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.title.rating:
+            self.title.rating.update_average_score()
+        else:
+            self.title.rating = Rating.objects.create(
+                title=self.title,
+                average_score=self.score
+            )
+
+    def delete(self, *args, **kwargs):
+        self.title.rating.update_average_score()
+        super().delete(*args, **kwargs)
+
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
@@ -106,10 +127,21 @@ class Review(models.Model):
 
 class Rating(models.Model):
     title = models.OneToOneField(
-        Title, on_delete=models.CASCADE,
+        Title,
+        on_delete=models.CASCADE,
         related_name='rating'
     )
-    average_score = models.DecimalField(max_digits=2, decimal_places=1)
+    average_score = models.DecimalField(
+        max_digits=2,
+        decimal_places=1,
+        null=True
+    )
+
+    def __str__(self):
+        return str(self.average_score)
+
+    def __repr__(self):
+        return str(self.average_score)
 
     def update_average_score(self):
         # метод будет вызываться при удалении и добавлении Review
