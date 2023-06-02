@@ -12,6 +12,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+AUTH_USER_MODEL = 'reviews.MyUser'
 
 # Application definition
 
@@ -24,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'djoser',
+    'reviews',
+
 ]
 
 MIDDLEWARE = [
