@@ -1,4 +1,5 @@
 from django.urls import include, path
+from .views import (sign_up, get_token)
 
 
 urlpatterns = [
