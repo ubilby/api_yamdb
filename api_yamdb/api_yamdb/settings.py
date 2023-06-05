@@ -107,6 +107,7 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'reviews.MyUser'
+
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
