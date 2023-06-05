@@ -34,12 +34,6 @@ class TitleReadSerializer(serializers.ModelSerializer):
                   'description', 'genre', 'category')
         search_fields = ('category', 'genre',)
 
-    # def get_rating(self, obj):
-    #     if obj.reviews.count() == 0:
-    #         return None
-    #     rev = Review.objects.filter(title=obj).aggregate(rating=Avg('score'))
-    #     return rev['rating']
-
 
 class TitleWriteSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
@@ -78,3 +72,19 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Comment
         read_only_fields = ('review',)
+
+
+class SignupSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.RegexField(regex=r'^[\w.@+-]+$',
+                                      max_length=150,
+                                      required=True)
+
+    class Meta:
+        fields = ('email', 'username')
+        model = User
+
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
