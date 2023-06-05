@@ -1,34 +1,23 @@
-from rest_framework import status
-from .serializers import (SignupSerializer, TokenSerializer)
-from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from django.db import IntegrityError
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import get_object_or_404
-from .utils import token_to_email
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import viewsets
-from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from reviews.models import Category, Genre, Review, Title
+
 from .filters import TitlesFilter
 from .permissions import IsAuthorOrReadOnlyPermission
-from .serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    ReviewSerializer,
-    TitleReadSerializer,
-    TitleWriteSerializer
-)
-
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer, SignupSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenSerializer)
+from .utils import token_to_email
 
 # class для юзера
 #   queryset =
