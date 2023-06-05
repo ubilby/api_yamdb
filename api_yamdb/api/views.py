@@ -39,8 +39,6 @@ def sign_up(request):
     confirmation_code = default_token_generator.make_token(user)
     email = user.email
     token_to_email(email, confirmation_code)
-    user.confirmation_code = confirmation_code
-    user.save()
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
