@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission
+from .permissions import IsAuthorOrReadOnlyPermission, IsReviewAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -91,7 +91,25 @@ class GenreViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnlyPermission,)
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class PermissionViewSet(viewsets.ModelViewSet):
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            # Доступно без токена
+            permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+        elif self.action in ['create']:
+            # Только аутентифицированные пользователи
+            permission_classes = [permissions.IsAuthenticated]
+        elif self.action in ['destroy']:
+            # Автор отзыва, модератор или администратор
+            permission_classes = [IsReviewAuthorOrModeratorOrAdmin]
+        else:
+            # По умолчанию, только аутентифицированные пользователи
+            permission_classes = [permissions.IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
+
+
+class ReviewViewSet(PermissionViewSet):
     queryset = Review.objects.select_related('title').all()
     serializer_class = ReviewSerializer
 
@@ -102,7 +120,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(PermissionViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
