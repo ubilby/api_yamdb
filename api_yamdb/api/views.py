@@ -7,6 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Category, Genre, Review, Title
 from .filters import TitlesFilter
+from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -38,6 +39,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name', )
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthorOrReadOnlyPermission,)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -46,6 +48,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     search_fields = ('name', )
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthorOrReadOnlyPermission,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
