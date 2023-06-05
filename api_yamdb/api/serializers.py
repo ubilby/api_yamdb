@@ -23,7 +23,10 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.SlugRelatedField(
+        slug_field='average_score',
+        read_only=True,
+    )
 
     class Meta:
         model = Title
@@ -31,11 +34,11 @@ class TitleReadSerializer(serializers.ModelSerializer):
                   'description', 'genre', 'category')
         search_fields = ('category', 'genre',)
 
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        rev = Review.objects.filter(title=obj).aggregate(rating=Avg('score'))
-        return rev['rating']
+    # def get_rating(self, obj):
+    #     if obj.reviews.count() == 0:
+    #         return None
+    #     rev = Review.objects.filter(title=obj).aggregate(rating=Avg('score'))
+    #     return rev['rating']
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):

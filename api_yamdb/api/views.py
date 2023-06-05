@@ -20,7 +20,7 @@ from .serializers import (
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
 
     # фильтры, возможно придётся удалить?
