@@ -7,7 +7,8 @@ from reviews.models import Category, Comment, Genre, Review, Title
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = '__all__'
+        exclude = ('id', )
+        fields = ('name', 'slug',)
         lookup_field = 'slug'
 
 
@@ -15,25 +16,23 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
-        fields = '__all__'
+        fields = ('name', 'slug',)
         lookup_field = 'slug'
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.FloatField(read_only=True)
+    rating = serializers.SlugRelatedField(
+        slug_field='average_score',
+        read_only=True,
+    )
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
         search_fields = ('category', 'genre',)
-
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        rev = Review.objects.filter(title=obj).aggregate(rating=Avg('score'))
-        return rev['rating']
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -48,7 +47,8 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
         model = Title
 
 
