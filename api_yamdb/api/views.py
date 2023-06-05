@@ -8,9 +8,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from api_yamdb.reviews.models import MyUser
 
-from reviews.models import Category, Genre, Review, Title
+from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
 from .permissions import IsAuthorOrReadOnlyPermission
@@ -34,12 +33,14 @@ def sign_up(request):
     serializer = SignupSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     try:
-        user, _ = MyUser.objects.create_user(**serializer.validated_data)
+        user, _ = MyUser.objects.get_or_create(**serializer.validated_data)
     except IntegrityError:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     confirmation_code = default_token_generator.make_token(user)
     email = user.email
     token_to_email(email, confirmation_code)
+    user.confirmation_code = confirmation_code
+    user.save()
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -52,7 +53,7 @@ def get_token(request):
     username = serializer.validated_data['username']
     confirmation_code = serializer.validated_data['confirmation_code']
     user = get_object_or_404(MyUser, username=username)
-    if confirmation_code == user.confirmation_code:
+    if default_token_generator.check_token(user, confirmation_code):
         token = AccessToken.for_user(user)
         return Response({f'{token}'}, status=status.HTTP_200_OK)
     return Response({'confirmation_code': 'Неверный код подтверждения'},

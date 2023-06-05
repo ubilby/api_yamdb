@@ -29,7 +29,7 @@ router_v1.register(
 )
 
 urlpatterns = [
-    path('signup/', sign_up, name='sign_up'),
-    path('get-token/', get_token, name='get_token'),
+    path('auth/signup/', sign_up, name='sign_up'),
+    path('auth/get-token/', get_token, name='get_token'),
     path('', include(router_v1.urls)),
 ]
