@@ -6,12 +6,19 @@ from .validators import validate_year
 
 
 class MyUser(AbstractUser):
+    ROLE_USER = 0
+    ROLE_MODERATOR = 1
+    ROLE_ADMIN = 2
+
+    ROLE_CHOICES = (
+        (ROLE_USER, 'User'),
+        (ROLE_MODERATOR, 'Moderator'),
+        (ROLE_ADMIN, 'Admin'),
+    )
+
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    is_user = models.BooleanField(default=False)
-    is_moderator = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    role = models.IntegerField(choices=ROLE_CHOICES, default=ROLE_USER)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
