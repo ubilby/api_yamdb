@@ -48,7 +48,7 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField(validators=(validate_year,))
-    description = models.CharField()
+    description = models.TextField()
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
