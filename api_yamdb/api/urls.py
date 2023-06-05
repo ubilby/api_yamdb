@@ -32,7 +32,5 @@ router_v1.register(
 )
 
 urlpatterns = [
-    # path('auth/', include('djoser.urls')),
-    # path('auth/', include('djoser.urls.jwt')),
-    path('v1/', include(router_v1.urls)),
+    path('', include(router_v1.urls)),
 ]

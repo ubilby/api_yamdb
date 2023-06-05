@@ -47,21 +47,23 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.IntegerField(validators=(validate_year,))
-    description = models.CharField()
+    year = models.IntegerField()
+    description = models.TextField()
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
         verbose_name='Категория',
         null=True,
+        blank=True,
     )
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
         related_name='titles',
         verbose_name='Жанр',
-        null=True
+        null=True,
+        blank=True,
     )
 
     def save(self, *args, **kwargs):
@@ -69,7 +71,7 @@ class Title(models.Model):
         super().save(*args, **kwargs)  # Сохраняем экземпляр Title
 
         if created:  # Если экземпляр был только что создан
-            Rating.objects.create(title=self, average_score=0.0)
+            Rating.objects.create(title=self, average_score=0)
 
     class Meta:
         verbose_name = 'Произведение'
@@ -133,9 +135,8 @@ class Rating(models.Model):
         on_delete=models.CASCADE,
         related_name='rating'
     )
-    average_score = models.DecimalField(
-        max_digits=2,
-        decimal_places=1,
+    average_score = models.IntegerField(
+        default=0,
         null=True
     )
 
@@ -146,12 +147,10 @@ class Rating(models.Model):
         return str(self.average_score)
 
     def update_average_score(self):
-        # метод будет вызываться при удалении и добавлении Review
-        # надо только понять когда это будет происходить
         reviews = self.title.reviews.all()
         if reviews:
             total_score = sum(review.score for review in reviews)
-            self.average_score = total_score / len(reviews)
+            self.average_score = round(total_score / len(reviews))
         else:
             self.average_score = 0
         self.save()
