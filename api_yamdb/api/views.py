@@ -7,6 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Category, Genre, Review, Title
 from .filters import TitlesFilter
+from .mixins import MultiMixin
 from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (
     CategorySerializer,
@@ -20,7 +21,7 @@ from .serializers import (
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # lookup_field = 'slug'
+    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
 
     # фильтры, возможно придётся удалить?
@@ -33,7 +34,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(MultiMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     search_fields = ('name', )
@@ -42,7 +43,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnlyPermission,)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(MultiMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     search_fields = ('name', )
