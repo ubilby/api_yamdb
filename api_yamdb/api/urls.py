@@ -33,6 +33,6 @@ router_v1.register(
 
 urlpatterns = [
     path('', include(router_v1.urls)),
-    path('v1/auth/signup/', sign_up, name='signup'),
-    path('v1/auth/token/', get_token, name='token'),
+    path('auth/signup/', sign_up, name='signup'),
+    path('auth/token/', get_token, name='token'),
 ]

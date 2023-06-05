@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api.apps.ApiConfig',
+    # 'api.apps.ApiConfig',
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
@@ -107,7 +107,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-AUTH_USER_MODEL = 'users.User'
+# AUTH_USER_MODEL = 'users.User'
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
