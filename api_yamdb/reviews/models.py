@@ -70,7 +70,7 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Жанр',
         blank=True,
-
+        null=True
     )
 
     def save(self, *args, **kwargs):
