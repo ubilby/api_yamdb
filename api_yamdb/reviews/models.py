@@ -19,6 +19,7 @@ class MyUser(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     role = models.IntegerField(choices=ROLE_CHOICES, default=ROLE_USER)
+    bio = models.TextField(blank=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
