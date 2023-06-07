@@ -48,7 +48,7 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField(validators=(validate_year,))
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -61,8 +61,8 @@ class Title(models.Model):
         Genre,
         related_name='titles',
         verbose_name='Жанр',
-        null=True,
-        blank=True,
+        # null=True,
+        # blank=True,
     )
 
     def save(self, *args, **kwargs):
