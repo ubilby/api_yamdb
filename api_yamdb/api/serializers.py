@@ -1,13 +1,15 @@
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, MyUser, Review, Title
+from .validators import username_validator
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         exclude = ('id', )
-        fields = ('name', 'slug',)
+        # fields = ('name', 'slug',)
         lookup_field = 'slug'
 
 
@@ -15,7 +17,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
-        fields = ('name', 'slug',)
+        # fields = ('name', 'slug',)
         lookup_field = 'slug'
 
 
@@ -31,7 +33,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
-        search_fields = ('category', 'genre',)
+
+        search_fields = ('category', 'genre', 'name')
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -57,7 +60,13 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = '__all__'
+        fields = (
+            "id",
+            "text",
+            "author",
+            "score",
+            "pub_date"
+        )
         model = Review
         read_only_fields = ('title',)
 
@@ -71,3 +80,63 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Comment
         read_only_fields = ('review',)
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role",
+        )
+        read_only_fields = ("role",)
+        # username = serializers.RegexField(
+        #     regex=r'[\w.@+-]+\z',
+        #     max_length=64,
+        #     required=True
+        # )
+        model = MyUser
+
+
+# class UserCreateSerializer(UserSerializer):
+#     class Meta:
+#         read_only_fields = ("role",)
+#         username = serializers.RegexField(
+#             regex=r'[\w.@+-]+$',
+#             max_length=64,
+#             required=True,
+#         )
+
+#         email = serializers.EmailField(
+#             max_length=256,
+#             required=True,
+#         )
+#         model = MyUser
+#         fields = ('username',
+#                   'email',
+#                   'first_name',
+#                   'last_name',
+#                   'bio',
+#                   'role')
+
+#     def validate_username(self, value):
+#         return username_validator(value)
+
+
+class SignupSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.RegexField(regex=r'^[\w.@+-]+$',
+                                      max_length=150,
+                                      required=True)
+
+    class Meta:
+        fields = ('email', 'username')
+        model = MyUser
+
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()

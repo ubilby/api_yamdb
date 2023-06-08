@@ -1,21 +1,53 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import validate_year
 
 
 class MyUser(AbstractUser):
+    ROLE_USER = 'user'
+    ROLE_MODERATOR = 'moderator'
+    ROLE_ADMIN = 'admin'
+
+    ROLE_CHOICES = (
+        (ROLE_USER, 'user'),
+        (ROLE_MODERATOR, 'moderator'),
+        (ROLE_ADMIN, 'admin'),
+    )
+
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    is_user = models.BooleanField(default=False)
-    is_moderator = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    role = models.CharField(
+        max_length=64,
+        choices=ROLE_CHOICES,
+        default=ROLE_USER
+    )
+    bio = models.TextField(blank=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email']
+
+    class Meta:
+        verbose_name = 'Юзверь'
+        verbose_name_plural = 'Юзвери'
+        ordering = ("username",)
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(username="me"), name="name_not_me"
+            )
+        ]
+
+    @property
+    def is_moderator(self):
+        return self.role == self.ROLE_MODERATOR
+
+    @property
+    def is_admin(self):
+        return self.role == (self.ROLE_ADMIN
+                             or self.is_superuser
+                             or self.is_staff)
 
     def __str__(self):
         return self.username
@@ -61,16 +93,16 @@ class Title(models.Model):
         Genre,
         related_name='titles',
         verbose_name='Жанр',
-        # null=True,
-        # blank=True,
+        blank=True,
+        null=True
     )
 
-    def save(self, *args, **kwargs):
-        created = not self.pk  # Проверяем, является ли экземпляр новым
-        super().save(*args, **kwargs)  # Сохраняем экземпляр Title
+    # def save(self, *args, **kwargs):
+    #     created = not self.pk  # Проверяем, является ли экземпляр новым
+    #     super().save(*args, **kwargs)  # Сохраняем экземпляр Title
 
-        if created:  # Если экземпляр был только что создан
-            Rating.objects.create(title=self, average_score=0)
+    #     if created:  # Если экземпляр был только что создан
+    #         Rating.objects.create(title=self, average_score=0)
 
     class Meta:
         verbose_name = 'Произведение'
