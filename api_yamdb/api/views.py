@@ -11,10 +11,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
-from reviews.models import Category, Genre, MyUser, Review, Title
+from reviews.models import Category, Genre, MyUser, Review, Title, Rating
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin
+from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -92,6 +92,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
+    permission_classes = (IsModeratorOrAdmin,)
 
     # фильтры, возможно придётся удалить?
     filter_backends = (DjangoFilterBackend, )
@@ -102,6 +103,15 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitleReadSerializer
         return TitleWriteSerializer
 
+    def perform_create(self, serializer):
+        title = serializer.save()  # Сохранение тайтла и получение созданного объекта
+
+        Rating.objects.create(title=title)
+        return Response(
+            {'title': TitleReadSerializer(title).data},
+            status=status.HTTP_201_CREATED
+        )
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -109,7 +119,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name', )
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsModeratorOrAdmin,)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -118,7 +128,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     search_fields = ('name', )
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsModeratorOrAdmin,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
