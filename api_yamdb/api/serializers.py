@@ -93,11 +93,11 @@ class UserSerializer(ModelSerializer):
             "role",
         )
         read_only_fields = ("role",)
-        # username = serializers.RegexField(
-        #     regex=r'[\w.@+-]+\z',
-        #     max_length=64,
-        #     required=True
-        # )
+        username = serializers.RegexField(
+            regex=r'[\w.@+-]+$',
+            max_length=64,
+            required=True
+        )
         model = MyUser
 
 

@@ -93,7 +93,6 @@ def get_token(request):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     lookup_field = 'slug'
@@ -115,7 +114,7 @@ class CategoryViewSet(MultiMixin):
     search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
 
 
 class GenreViewSet(MultiMixin):
@@ -124,7 +123,7 @@ class GenreViewSet(MultiMixin):
     search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

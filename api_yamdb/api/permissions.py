@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-# from reviews.models import MyUser
+from reviews.models import MyUser
 
 
 class IsAuthorOrReadOnlyPermission(permissions.BasePermission):
@@ -11,6 +11,8 @@ class IsAuthorOrReadOnlyPermission(permissions.BasePermission):
             or request.user.is_admin
             or request.user.is_moderator
             or request.user.is_authenticated
+            or request.user.role == MyUser.ROLE_MODERATOR
+            or request.user.role == MyUser.ROLE_ADMIN
         )
 
     def has_object_permission(self, request, view, obj):
@@ -35,8 +37,8 @@ class IsAuthorOrModeratorOrAdmin(permissions.BasePermission):
             or request.user.is_authenticated
             and (
                 obj.author == request.user
-                # or request.user.role == MyUser.ROLE_MODERATOR
-                # or request.user.role == MyUser.ROLE_ADMIN
+                or request.user.role == MyUser.ROLE_MODERATOR
+                or request.user.role == MyUser.ROLE_ADMIN
             )
         ):
             return True
