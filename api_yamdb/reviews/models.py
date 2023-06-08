@@ -6,14 +6,14 @@ from .validators import validate_year
 
 
 class MyUser(AbstractUser):
-    ROLE_USER = 0
-    ROLE_MODERATOR = 1
-    ROLE_ADMIN = 2
+    ROLE_USER = 'user'
+    ROLE_MODERATOR = 'moderator'
+    ROLE_ADMIN = 'admin'
 
     ROLE_CHOICES = (
-        (ROLE_USER, 'User'),
-        (ROLE_MODERATOR, 'Moderator'),
-        (ROLE_ADMIN, 'Admin'),
+        (ROLE_USER, 'user'),
+        (ROLE_MODERATOR, 'moderator'),
+        (ROLE_ADMIN, 'admin'),
     )
 
     username = models.CharField(max_length=150, unique=True)
@@ -28,6 +28,26 @@ class MyUser(AbstractUser):
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email']
+
+    class Meta:
+        verbose_name = 'Юзверь'
+        verbose_name_plural = 'Юзвери'
+        ordering = ("username",)
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(username="me"), name="name_not_me"
+            )
+        ]
+
+    @property
+    def is_moderator(self):
+        return self.role == self.ROLE_MODERATOR
+
+    @property
+    def is_admin(self):
+        return self.role == (self.ROLE_ADMIN
+                             or self.is_superuser
+                             or self.is_staff)
 
     def __str__(self):
         return self.username
@@ -78,12 +98,12 @@ class Title(models.Model):
         null=True
     )
 
-    def save(self, *args, **kwargs):
-        created = not self.pk  # Проверяем, является ли экземпляр новым
-        super().save(*args, **kwargs)  # Сохраняем экземпляр Title
+    # def save(self, *args, **kwargs):
+    #     created = not self.pk  # Проверяем, является ли экземпляр новым
+    #     super().save(*args, **kwargs)  # Сохраняем экземпляр Title
 
-        if created:  # Если экземпляр был только что создан
-            Rating.objects.create(title=self, average_score=0)
+    #     if created:  # Если экземпляр был только что создан
+    #         Rating.objects.create(title=self, average_score=0)
 
     class Meta:
         verbose_name = 'Произведение'

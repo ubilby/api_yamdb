@@ -2,11 +2,13 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from reviews.models import Category, Genre, MyUser, Review, Title
@@ -16,7 +18,7 @@ from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmi
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
-                          TokenSerializer)
+                          TokenSerializer, UserSerializer)
 from .utils import token_to_email
 
 # class для юзера
@@ -24,6 +26,34 @@ from .utils import token_to_email
 #   serializer_class =
 #   permission_classes =
 #   pagination_class =
+
+
+class UserViewSet(ModelViewSet):
+    lookup_field = 'username'
+    search_fields = ('username',)
+    queryset = MyUser.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    filter_backends = (filters.SearchFilter,)
+
+    @action(
+        methods=["get", "patch"],
+        detail=False,
+        url_path="me",
+        permission_classes=(IsAuthenticated,),
+    )
+    def users_own_profile(self, request):
+        user = request.user
+        if request.method == "PATCH":
+            serializer = self.get_serializer(
+                user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        else:
+            serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
