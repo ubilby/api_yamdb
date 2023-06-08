@@ -33,6 +33,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
+
         search_fields = ('category', 'genre', 'name')
 
 

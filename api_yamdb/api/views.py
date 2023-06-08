@@ -14,6 +14,16 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
+from .mixins import MultiMixin
+from .permissions import IsAuthorOrReadOnlyPermission
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    TitleReadSerializer,
+    TitleWriteSerializer
+)
 from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
@@ -83,9 +93,10 @@ def get_token(request):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # lookup_field = 'slug'
+    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
 
     # фильтры, возможно придётся удалить?
@@ -98,7 +109,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(MultiMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     search_fields = ('name',)
@@ -107,7 +118,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnlyPermission,)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(MultiMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     search_fields = ('name',)
