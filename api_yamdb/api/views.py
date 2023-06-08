@@ -15,17 +15,12 @@ from reviews.models import Category, Genre, MyUser, Review, Title, Rating
 
 from .filters import TitlesFilter
 from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin
+from .mixins import MultiMixin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           TokenSerializer, UserSerializer)
 from .utils import token_to_email
-
-# class для юзера
-#   queryset =
-#   serializer_class =
-#   permission_classes =
-#   pagination_class =
 
 
 class UserViewSet(ModelViewSet):
@@ -36,6 +31,7 @@ class UserViewSet(ModelViewSet):
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrReadOnlyPermission,)
     filter_backends = (filters.SearchFilter,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=["get", "patch"],
@@ -90,7 +86,7 @@ def get_token(request):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # lookup_field = 'slug'
+    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsModeratorOrAdmin,)
 
@@ -113,19 +109,19 @@ class TitleViewSet(viewsets.ModelViewSet):
         )
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(MultiMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    search_fields = ('name', )
+    search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsModeratorOrAdmin,)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(MultiMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    search_fields = ('name', )
+    search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsModeratorOrAdmin,)

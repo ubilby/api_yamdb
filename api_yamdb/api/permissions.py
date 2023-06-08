@@ -11,6 +11,8 @@ class IsAuthorOrReadOnlyPermission(permissions.BasePermission):
             or request.user.is_admin
             or request.user.is_moderator
             or request.user.is_authenticated
+            or request.user.role == MyUser.ROLE_MODERATOR
+            or request.user.role == MyUser.ROLE_ADMIN
         )
 
     def has_object_permission(self, request, view, obj):
