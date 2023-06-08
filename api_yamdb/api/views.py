@@ -5,14 +5,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission, IsReviewAuthorOrModeratorOrAdmin
+from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -91,27 +91,9 @@ class GenreViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnlyPermission,)
 
 
-class PermissionViewSet(viewsets.ModelViewSet):
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            # Доступно без токена
-            permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-        elif self.action in ['create']:
-            # Только аутентифицированные пользователи
-            permission_classes = [permissions.IsAuthenticated]
-        elif self.action in ['destroy']:
-            # Автор отзыва, модератор или администратор
-            permission_classes = [IsReviewAuthorOrModeratorOrAdmin]
-        else:
-            # По умолчанию, только аутентифицированные пользователи
-            permission_classes = [permissions.IsAuthenticated]
-
-        return [permission() for permission in permission_classes]
-
-
-class ReviewViewSet(PermissionViewSet):
-    queryset = Review.objects.select_related('title').all()
+class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (IsAuthorOrModeratorOrAdmin, )
 
     def perform_create(self, serializer):
         serializer.save(
@@ -119,9 +101,14 @@ class ReviewViewSet(PermissionViewSet):
             title=get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         )
 
+    def get_queryset(self):
+        review = Review.objects.filter(title_id=self.kwargs.get('title_id'))
+        return review.all()
 
-class CommentViewSet(PermissionViewSet):
+
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (IsAuthorOrModeratorOrAdmin, )
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
