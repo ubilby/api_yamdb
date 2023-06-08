@@ -10,22 +10,25 @@ from .validators import username_validator
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        exclude = ('id', )
-        # fields = ('name', 'slug',)
+        fields = ('name', 'slug',)
         lookup_field = 'slug'
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        exclude = ('id',)
-        # fields = ('name', 'slug',)
+        fields = ('name', 'slug',)
         lookup_field = 'slug'
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(
+        read_only=True,
+    )
+    genre = GenreSerializer(
+        read_only=True,
+        many=True,
+    )
     rating = serializers.SlugRelatedField(
         slug_field='average_score',
         read_only=True,
@@ -42,7 +45,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 class TitleWriteSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='slug'
+        slug_field='slug',
     )
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
@@ -51,7 +54,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'name', 'year', 'rating',
+        fields = ('id', 'name', 'year',
                   'description', 'genre', 'category')
         model = Title
 
