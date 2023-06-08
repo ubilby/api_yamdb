@@ -21,12 +21,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TokenSerializer, UserSerializer)
 from .utils import token_to_email
 
-# class для юзера
-#   queryset =
-#   serializer_class =
-#   permission_classes =
-#   pagination_class =
-
 
 class UserViewSet(ModelViewSet):
     lookup_field = 'username'
@@ -36,6 +30,7 @@ class UserViewSet(ModelViewSet):
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrReadOnlyPermission,)
     filter_backends = (filters.SearchFilter,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=["get", "patch"],
@@ -106,7 +101,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    search_fields = ('name', )
+    search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrReadOnlyPermission,)
@@ -115,7 +110,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    search_fields = ('name', )
+    search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthorOrReadOnlyPermission,)
