@@ -1,3 +1,6 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -16,7 +19,16 @@ class MyUser(AbstractUser):
         (ROLE_ADMIN, 'admin'),
     )
 
-    username = models.CharField(max_length=150, unique=True)
+    def username_validator(value):
+        pattern = r'^[\w.@+-]+\Z'
+        if re.match(pattern, value) is None:
+            raise ValidationError('error')
+
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[username_validator]
+    )
     email = models.EmailField(unique=True)
     role = models.CharField(
         max_length=64,
