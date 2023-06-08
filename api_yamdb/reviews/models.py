@@ -94,15 +94,7 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Жанр',
         blank=True,
-        null=True
     )
-
-    # def save(self, *args, **kwargs):
-    #     created = not self.pk  # Проверяем, является ли экземпляр новым
-    #     super().save(*args, **kwargs)  # Сохраняем экземпляр Title
-
-    #     if created:  # Если экземпляр был только что создан
-    #         Rating.objects.create(title=self, average_score=0)
 
     class Meta:
         verbose_name = 'Произведение'
@@ -164,7 +156,9 @@ class Rating(models.Model):
     title = models.OneToOneField(
         Title,
         on_delete=models.CASCADE,
-        related_name='rating'
+        related_name='rating',
+        null=True,
+        blank=True
     )
     average_score = models.IntegerField(
         default=0,
@@ -195,14 +189,14 @@ class Comment(models.Model):
         Review, on_delete=models.CASCADE, related_name='comments'
     )
     text = models.TextField()
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ('-created',)
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.text
