@@ -93,7 +93,7 @@ class UserSerializer(ModelSerializer):
     username = serializers.RegexField(
         regex=r'[\w.@+-]+\Z',
         max_length=150,
-        required=True
+        required=True,
     )
 
     class Meta:
@@ -116,6 +116,8 @@ class UserSerializer(ModelSerializer):
     def validate_username(self, value):
         pattern = r'^[\w.@+-]+\Z'
         if re.match(pattern, value) is None:
+            raise serializers.ValidationError('error!')
+        if MyUser.objects.filter(username=value).exists():
             raise serializers.ValidationError('error!')
         return value
 
