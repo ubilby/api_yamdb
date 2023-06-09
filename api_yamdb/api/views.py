@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from reviews.models import Category, Genre, MyUser, Review, Title, Rating
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin
+from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin, IsAdmin
 from .mixins import MultiMixin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
@@ -88,7 +88,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsModeratorOrAdmin,)
+    permission_classes = (IsAdmin,)
 
     # фильтры, возможно придётся удалить?
     filter_backends = (DjangoFilterBackend, )
@@ -115,7 +115,7 @@ class CategoryViewSet(MultiMixin):
     search_fields = ('name',)
     # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsModeratorOrAdmin,)
+    permission_classes = (IsAdmin,)
 
 
 class GenreViewSet(MultiMixin):
@@ -124,7 +124,7 @@ class GenreViewSet(MultiMixin):
     search_fields = ('name',)
     # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsModeratorOrAdmin,)
+    permission_classes = (IsAdmin,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

@@ -176,7 +176,6 @@ class Rating(models.Model):
         blank=True
     )
     average_score = models.IntegerField(
-        default=0,
         null=True
     )
 
