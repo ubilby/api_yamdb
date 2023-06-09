@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+
 import re
 
 from rest_framework import serializers
@@ -105,6 +107,11 @@ class UserSerializer(ModelSerializer):
         )
         read_only_fields = ("role",)
         model = MyUser
+
+    def validate_role(self, value):
+        roles = [choice[0] for choice in MyUser.ROLE_CHOICES]
+        if value not in roles:
+            raise serializers.ValidationError('Несуществующая роль.')
 
     def validate_username(self, value):
         pattern = r'^[\w.@+-]+\Z'
