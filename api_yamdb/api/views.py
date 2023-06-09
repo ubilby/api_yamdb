@@ -1,8 +1,10 @@
+from re import match
+
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets, exceptions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.decorators import action, api_view
@@ -14,7 +16,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from reviews.models import Category, Genre, MyUser, Review, Title, Rating
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin
+from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin, IsAdmin, IsAdminOrReadOnly
 from .mixins import MultiMixin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
@@ -29,7 +31,7 @@ class UserViewSet(ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -46,6 +48,15 @@ class UserViewSet(ModelViewSet):
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
+
+            if 'username' in serializer.validated_data:
+                username = serializer.validated_data['username']
+                if not match(r'^[\w.@+-]+$', username):
+                    return Response(
+                        {'detail': 'Неверный формат поля username.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
             serializer.save()
         else:
             serializer = self.get_serializer(user)
@@ -86,9 +97,9 @@ def get_token(request):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsModeratorOrAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
 
     # фильтры, возможно придётся удалить?
     filter_backends = (DjangoFilterBackend, )
@@ -115,7 +126,7 @@ class CategoryViewSet(MultiMixin):
     search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsModeratorOrAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class GenreViewSet(MultiMixin):
@@ -124,7 +135,7 @@ class GenreViewSet(MultiMixin):
     search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsModeratorOrAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -132,9 +143,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrModeratorOrAdmin, )
 
     def perform_create(self, serializer):
+        author = self.request.user
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        titles = Title.objects.filter(reviews__author=author)
+        if title in titles:
+            raise exceptions.ValidationError('У вас уже есть отзыв')
         serializer.save(
-            author=self.request.user,
-            title=get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+            author=author,
+            title=title
         )
 
     def get_queryset(self):
