@@ -4,23 +4,20 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import exceptions, filters, permissions, status, viewsets
-from rest_framework.filters import SearchFilter
+from rest_framework import exceptions, filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.filters import SearchFilter
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, MyUser, Rating, Review, Title
 
-from .filters import TitlesFilter, CategoriesFilter
+from .filters import TitlesFilter
 from .mixins import MultiMixin
-from .permissions import (IsAdmin, IsAdminOrReadOnly,
-                          IsAuthorOrModeratorOrAdmin,
-                          IsAuthorOrReadOnlyPermission, IsModeratorOrAdmin)
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -101,7 +98,7 @@ def get_token(request):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     # lookup_field = 'slug'
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
 
     # фильтры, возможно придётся удалить?
