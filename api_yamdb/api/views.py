@@ -4,20 +4,22 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets, exceptions
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
-from rest_framework.decorators import action, api_view
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework import exceptions, filters, permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-
-from reviews.models import Category, Genre, MyUser, Review, Title, Rating
+from reviews.models import Category, Genre, MyUser, Rating, Review, Title
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin, IsAdmin, IsAdminOrReadOnly
 from .mixins import MultiMixin
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorOrModeratorOrAdmin,
+                          IsAuthorOrReadOnlyPermission, IsModeratorOrAdmin)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
