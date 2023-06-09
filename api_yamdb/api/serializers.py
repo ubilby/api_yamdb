@@ -1,4 +1,7 @@
 from django.shortcuts import get_object_or_404
+
+import re
+
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
@@ -87,6 +90,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
+    username = serializers.RegexField(
+        regex=r'[\w.@+-]+\Z',
+        max_length=150,
+        required=True
+    )
+
     class Meta:
         fields = (
             "username",
@@ -97,11 +106,6 @@ class UserSerializer(ModelSerializer):
             "role",
         )
         read_only_fields = ("role",)
-        username = serializers.RegexField(
-            regex=r'[\w.@+-]+$',
-            max_length=64,
-            required=True
-        )
         model = MyUser
 
     def validate_role(self, value):
@@ -109,6 +113,10 @@ class UserSerializer(ModelSerializer):
         if value not in roles:
             raise serializers.ValidationError('Несуществующая роль.')
 
+    def validate_username(self, value):
+        pattern = r'^[\w.@+-]+\Z'
+        if re.match(pattern, value) is None:
+            raise serializers.ValidationError('error!')
         return value
 
 
@@ -139,13 +147,20 @@ class UserSerializer(ModelSerializer):
 
 class SignupSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=254, required=True)
-    username = serializers.RegexField(regex=r'^[\w.@+-]+$',
-                                      max_length=150,
-                                      required=True)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+\Z',
+        max_length=150,
+    )
 
     class Meta:
         fields = ('email', 'username')
         model = MyUser
+
+    def validate_username(self, value):
+        pattern = r'^[\w.@+-]+\Z'
+        if re.match(pattern, value) is None:
+            raise serializers.ValidationError('error!')
+        return value
 
 
 class TokenSerializer(serializers.Serializer):
