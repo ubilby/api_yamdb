@@ -104,7 +104,18 @@ class Title(models.Model):
         return self.name
 
 
+class ReviewManager(models.Manager):
+    def create(self, **kwargs):
+        title = kwargs.get('title')
+        author = kwargs.get('author')
+        if title and author:
+            if self.filter(title=title, author=author).exists():
+                return None
+        return super().create(**kwargs)
+
+
 class Review(models.Model):
+    objects = ReviewManager()
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -147,6 +158,10 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = ('-pub_date',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'], name='unique_title_author')
+        ]
 
     def __str__(self):
         return self.text

@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets, exceptions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.decorators import action, api_view
@@ -86,7 +86,7 @@ def get_token(request):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsModeratorOrAdmin,)
 
@@ -113,7 +113,7 @@ class CategoryViewSet(MultiMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     search_fields = ('name',)
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsModeratorOrAdmin,)
 
@@ -122,7 +122,7 @@ class GenreViewSet(MultiMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     search_fields = ('name',)
-    lookup_field = 'slug'
+    # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsModeratorOrAdmin,)
 
@@ -132,9 +132,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrModeratorOrAdmin, )
 
     def perform_create(self, serializer):
+        author = self.request.user
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        titles = Title.objects.filter(reviews__author=author)
+        if title in titles:
+            raise exceptions.ValidationError('У вас уже есть отзыв')
         serializer.save(
-            author=self.request.user,
-            title=get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+            author=author,
+            title=title
         )
 
     def get_queryset(self):

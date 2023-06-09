@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
@@ -9,14 +10,14 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug',)
-        lookup_field = 'slug'
+        # lookup_field = 'slug'
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug',)
-        lookup_field = 'slug'
+        # lookup_field = 'slug'
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
