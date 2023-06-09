@@ -113,7 +113,8 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
     def perform_create(self, serializer):
-        title = serializer.save()  # Сохранение тайтла и получение созданного объекта
+        # Сохранение тайтла и получение созданного объекта
+        title = serializer.save()
 
         Rating.objects.create(title=title)
         return Response(
