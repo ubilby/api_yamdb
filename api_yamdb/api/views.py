@@ -62,6 +62,18 @@ class UserViewSet(ModelViewSet):
             serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def perform_create(self, serializer):
+        username = serializer.validated_data['username']
+        if MyUser.objects.filter(username=username).exists():
+            return Response({'detail': 'Пользователь с таким именем уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            MyUser.objects.create(**serializer.validated_data)
+        except IntegrityError:
+            return Response({'detail': 'Пользователь с таким именем уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 @permission_classes((AllowAny, ))
