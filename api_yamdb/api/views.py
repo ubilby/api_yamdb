@@ -131,9 +131,7 @@ class CategoryViewSet(MultiMixin):
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
-    # filter_backends = (DjangoFilterBackend, )
     filter_backends = (SearchFilter, )
-    filterset_class = CategoriesFilter
 
 
 class GenreViewSet(MultiMixin):
