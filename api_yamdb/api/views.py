@@ -5,6 +5,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, filters, permissions, status, viewsets
+from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
@@ -15,7 +16,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from reviews.models import Category, Genre, MyUser, Rating, Review, Title
 
-from .filters import TitlesFilter
+from .filters import TitlesFilter, CategoriesFilter
 from .mixins import MultiMixin
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsAuthorOrModeratorOrAdmin,
@@ -130,11 +131,15 @@ class CategoryViewSet(MultiMixin):
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
+    # filter_backends = (DjangoFilterBackend, )
+    filter_backends = (SearchFilter, )
+    filterset_class = CategoriesFilter
 
 
 class GenreViewSet(MultiMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (SearchFilter, )
     search_fields = ('name',)
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
