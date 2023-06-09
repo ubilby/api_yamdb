@@ -10,14 +10,14 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug',)
-        # lookup_field = 'slug'
+        lookup_field = 'slug'
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug',)
-        # lookup_field = 'slug'
+        lookup_field = 'slug'
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
@@ -103,6 +103,13 @@ class UserSerializer(ModelSerializer):
             required=True
         )
         model = MyUser
+
+    def validate_role(self, value):
+        roles = [choice[0] for choice in MyUser.ROLE_CHOICES]
+        if value not in roles:
+            raise serializers.ValidationError('Несуществующая роль.')
+
+        return value
 
 
 # class UserCreateSerializer(UserSerializer):

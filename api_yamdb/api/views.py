@@ -1,3 +1,5 @@
+from re import match
+
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -14,7 +16,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from reviews.models import Category, Genre, MyUser, Review, Title, Rating
 
 from .filters import TitlesFilter
-from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin, IsAdmin
+from .permissions import IsAuthorOrReadOnlyPermission, IsAuthorOrModeratorOrAdmin, IsModeratorOrAdmin, IsAdmin, IsAdminOrReadOnly
 from .mixins import MultiMixin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
@@ -29,7 +31,7 @@ class UserViewSet(ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAuthorOrReadOnlyPermission,)
+    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -46,6 +48,15 @@ class UserViewSet(ModelViewSet):
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
+
+            if 'username' in serializer.validated_data:
+                username = serializer.validated_data['username']
+                if not match(r'^[\w.@+-]+$', username):
+                    return Response(
+                        {'detail': 'Неверный формат поля username.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
             serializer.save()
         else:
             serializer = self.get_serializer(user)
@@ -88,7 +99,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     # lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
 
     # фильтры, возможно придётся удалить?
     filter_backends = (DjangoFilterBackend, )
@@ -113,18 +124,18 @@ class CategoryViewSet(MultiMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     search_fields = ('name',)
-    # lookup_field = 'slug'
+    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class GenreViewSet(MultiMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     search_fields = ('name',)
-    # lookup_field = 'slug'
+    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

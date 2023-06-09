@@ -54,8 +54,6 @@ class IsModeratorOrAdmin(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        # Разрешить доступ, если пользователь является автором
-        # или модератором или администратором
         if (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
@@ -70,7 +68,7 @@ class IsModeratorOrAdmin(permissions.BasePermission):
         return False
 
 
-class IsAdmin(permissions.BasePermission):
+class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.method in permissions.SAFE_METHODS
@@ -84,8 +82,6 @@ class IsAdmin(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        # Разрешить доступ, если пользователь является автором
-        # или модератором или администратором
         if (
             request.method in permissions.SAFE_METHODS
             or request.user.is_authenticated
@@ -97,3 +93,11 @@ class IsAdmin(permissions.BasePermission):
             return True
 
         return False
+
+
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_admin or request.user.is_superuser
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_admin or request.user.is_superuser
