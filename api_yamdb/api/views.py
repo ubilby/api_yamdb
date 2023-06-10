@@ -17,7 +17,8 @@ from reviews.models import Category, Genre, MyUser, Rating, Review, Title
 
 from .filters import TitlesFilter
 from .mixins import MultiMixin
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorOrModeratorOrAdmin)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -91,7 +92,6 @@ class UserViewSet(ModelViewSet):
 @api_view(['POST'])
 @permission_classes((AllowAny, ))
 def sign_up(request):
-    # для регистрации
     serializer = SignupSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     try:
@@ -107,7 +107,6 @@ def sign_up(request):
 @api_view(['POST'])
 @permission_classes((AllowAny, ))
 def get_token(request):
-    # для получения токена
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
@@ -122,11 +121,8 @@ def get_token(request):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    # lookup_field = 'slug'
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
-
-    # фильтры, возможно придётся удалить?
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitlesFilter
 
@@ -136,9 +132,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
     def perform_create(self, serializer):
-        # Сохранение тайтла и получение созданного объекта
         title = serializer.save()
-
         Rating.objects.create(title=title)
         return Response(
             {'title': TitleReadSerializer(title).data},

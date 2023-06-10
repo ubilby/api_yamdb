@@ -1,11 +1,8 @@
 import re
 
-# from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from reviews.models import Category, Comment, Genre, MyUser, Review, Title
-
-# from .validators import username_validator
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -104,7 +101,6 @@ class UserSerializer(ModelSerializer):
             "bio",
             "role",
         )
-        # read_only_fields = ("role",)
         model = MyUser
 
     def validate_role(self, value):
@@ -120,31 +116,6 @@ class UserSerializer(ModelSerializer):
         if MyUser.objects.filter(username=value).exists():
             raise serializers.ValidationError('error!')
         return value
-
-
-# class UserCreateSerializer(UserSerializer):
-#     class Meta:
-#         read_only_fields = ("role",)
-#         username = serializers.RegexField(
-#             regex=r'[\w.@+-]+$',
-#             max_length=64,
-#             required=True,
-#         )
-
-#         email = serializers.EmailField(
-#             max_length=256,
-#             required=True,
-#         )
-#         model = MyUser
-#         fields = ('username',
-#                   'email',
-#                   'first_name',
-#                   'last_name',
-#                   'bio',
-#                   'role')
-
-#     def validate_username(self, value):
-#         return username_validator(value)
 
 
 class SignupSerializer(serializers.ModelSerializer):
