@@ -1,10 +1,11 @@
 import csv
 import os
-import sqlite3
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand  # CommandError
 
-from reviews.forms import CategoryForm, GenreForm, TitleForm, CommentForm, ReviewForm, MyUserForm
+from reviews.forms import (
+    CategoryForm, GenreForm, TitleForm, CommentForm, ReviewForm, MyUserForm
+)
 
 
 class Command(BaseCommand):
@@ -21,8 +22,31 @@ class Command(BaseCommand):
         for row in data:
             form = MyUserForm(data=row)
             form.save()
-            
 
+        data = self.csv_to_dict('category.csv')
+        for row in data:
+            form = CategoryForm(data=row)
+            form.save()
+
+        data = self.csv_to_dict('genre.csv')
+        for row in data:
+            form = GenreForm(data=row)
+            form.save()
+
+        data = self.csv_to_dict('review.csv')
+        for row in data:
+            form = ReviewForm(data=row)
+            form.save()
+
+        data = self.csv_to_dict('titles.csv')
+        for row in data:
+            form = TitleForm(data=row)
+            form.save()
+
+        data = self.csv_to_dict('comments.csv')
+        for row in data:
+            form = CommentForm(data=row)
+            form.save()
 
     # def main():
     #     con = sqlite3.connect('api_yamdb/db.sqlite3')
