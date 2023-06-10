@@ -124,18 +124,7 @@ class Title(models.Model):
         return self.name
 
 
-class ReviewManager(models.Manager):
-    def create(self, **kwargs):
-        title = kwargs.get('title')
-        author = kwargs.get('author')
-        if title and author:
-            if self.filter(title=title, author=author).exists():
-                return None
-        return super().create(**kwargs)
-
-
 class Review(models.Model):
-    objects = ReviewManager()
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
