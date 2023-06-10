@@ -104,13 +104,14 @@ class UserSerializer(ModelSerializer):
             "bio",
             "role",
         )
-        read_only_fields = ("role",)
+        # read_only_fields = ("role",)
         model = MyUser
 
     def validate_role(self, value):
         roles = [choice[0] for choice in MyUser.ROLE_CHOICES]
         if value not in roles:
             raise serializers.ValidationError('Несуществующая роль.')
+        return value
 
     def validate_username(self, value):
         pattern = r'^[\w.@+-]+\Z'

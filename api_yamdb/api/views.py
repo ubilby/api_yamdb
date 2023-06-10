@@ -57,7 +57,7 @@ class UserViewSet(ModelViewSet):
                         {'detail': 'Неверный формат поля username.'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-
+            serializer.validated_data.pop("role", None)
             serializer.save()
         else:
             serializer = self.get_serializer(user)
