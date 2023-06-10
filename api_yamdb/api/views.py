@@ -23,6 +23,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           TokenSerializer, UserSerializer)
 from .utils import token_to_email
+from .validators import is_valid_role
 
 
 class UserViewSet(ModelViewSet):
@@ -72,7 +73,13 @@ class UserViewSet(ModelViewSet):
         except IntegrityError:
             return Response({'detail': 'Пользователь с таким именем уже существует'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        role = self.request.data.get('role')
+        if role and not is_valid_role(role):
+            raise exceptions.ValidationError('Неверная роль')
+        return super().perform_update(serializer)
 
 
 @api_view(['POST'])

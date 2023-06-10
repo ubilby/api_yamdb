@@ -12,3 +12,8 @@ def username_validator(value):
             f"Имя пользователя не должно содержать {unmatched}"
         )
     return value
+
+
+def is_valid_role(role):
+    valid_roles = ['admin', 'user', 'moderator']
+    return role in valid_roles
