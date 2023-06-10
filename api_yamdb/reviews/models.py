@@ -36,6 +36,13 @@ class MyUser(AbstractUser):
         default=ROLE_USER
     )
     bio = models.TextField(blank=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    confirmation_code = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True
+    )
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
