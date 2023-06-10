@@ -13,4 +13,6 @@ def validate_year(creation_year):
 def username_validator(value):
     pattern = r'^[\w.@+-]+\Z'
     if re.match(pattern, value) is None:
-        raise ValidationError('error')
+        raise ValidationError(
+            'Имя пользователя содержит недопустимые символы.'
+        )

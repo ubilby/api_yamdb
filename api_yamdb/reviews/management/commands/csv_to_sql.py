@@ -48,6 +48,10 @@ class Command(BaseCommand):
             form = CommentForm(data=row)
             form.save()
 
+        data = self.csv_to_dict('genre_title.csv')
+        for row in data:
+            
+
     # def main():
     #     con = sqlite3.connect('api_yamdb/db.sqlite3')
     #     cur = con.cursor
