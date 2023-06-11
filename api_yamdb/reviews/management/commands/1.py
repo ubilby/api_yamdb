@@ -2,12 +2,16 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand
-from django.forms import ValidationError
-from django.db.utils import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+# from django.forms import ValidationError
+# from django.db.utils import IntegrityError
+# from django.core.exceptions import ObjectDoesNotExist
 
-from reviews.models import MyUser, Category, Genre, Review, Comment, Title, Rating
-from reviews.forms import MyUserForm, TitleForm, CommentForm, ReviewForm, CategoryForm, GenreForm
+# from reviews.models import(
+#   MyUser, Category, Genre, Review, Comment, Title, Rating)
+from reviews.forms import (
+    MyUserForm, TitleForm, CommentForm, ReviewForm, CategoryForm, GenreForm
+)
+
 
 class Command(BaseCommand):
     help = 'Imports data from CSV files to DB'
