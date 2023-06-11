@@ -2,9 +2,9 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand
-from reviews.models import Category, Comment, Genre, MyUser, Review, Title
 
 from api_yamdb.settings import BASE_DIR
+from reviews.models import Category, Comment, Genre, MyUser, Review, Title
 
 
 class Command(BaseCommand):
@@ -20,10 +20,8 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **options):
-        for file, model in self.files_models.items():
-            path = os.path.realpath(
-                f'/Users/ubilby/codes/python/ya_practicum/sprint_10/api_yamdb/api_yamdb/static/data/{file}'
-            )
+        for file_, model in self.files_models.items():
+            path = os.path.join(BASE_DIR, 'static', 'data', file_)
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
                 for row in reader:
