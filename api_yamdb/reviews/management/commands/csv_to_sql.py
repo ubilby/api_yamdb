@@ -22,9 +22,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for file_, model in self.files_models.items():
             path = os.path.realpath(
-                f'/Users/ubilby/codes/python/ya_practicum/sprint_10/api_yamdb/api_yamdb/static/data/{file}'
+                f'./static/data/{file_}'
             )
-            print(f'{file_} - {model}')  # тестовый принт имён файла и модели
+            print(f'{file_} - {model}')
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
                 for row in reader:

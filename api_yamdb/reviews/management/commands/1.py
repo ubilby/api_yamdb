@@ -30,11 +30,10 @@ class Command(BaseCommand):
             path = os.path.realpath(
                 f'./static/data/{file_}'
             )
-            print(f'{file_} - {model}')  # тестовый принт имён файла и модели
+            print(f'{file_} - {model}')
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
                 for row in reader:
-                    # print(row)
                     form = model(row)
                     print(form.errors)
                     new_id = form.save(commit=False)
