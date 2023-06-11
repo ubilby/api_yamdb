@@ -59,7 +59,6 @@ class Command(BaseCommand):
                         form.save()
                     else:
                         print(form.errors)
-                        raise ValidationError('у вас Егор')
 
     # def csv_to_dict(self, file_name):
     #     path = os.path.realpath(f'.\\static\\data\\{file_name}')
