@@ -22,6 +22,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for file_, model in self.files_models.items():
             path = os.path.join(BASE_DIR, 'static', 'data', file_)
+
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
                 for row in reader:
