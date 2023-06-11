@@ -2,8 +2,6 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand
-from django.forms import ValidationError
-from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 from reviews.models import MyUser, Category, Genre, Review, Comment, Title, Rating
@@ -31,11 +29,7 @@ class Command(BaseCommand):
                 for row in reader:
                     if 'category' in row:
                         category_id = int(row['category'])
-                        try:
-                            category = Category.objects.get(id=category_id)
-                        except ObjectDoesNotExist:
-                            raise ValueError(
-                                f"Category with id {category_id} does not exist.")
+                        category = Category.objects.get(id=category_id)
                         row['category'] = category
 
                     if 'genre' in row:
@@ -43,9 +37,6 @@ class Command(BaseCommand):
                             int(g) for g in row['genre'].split(',')
                         ]
                         genres = Genre.objects.filter(id__in=genre_ids)
-                        if len(genres) != len(genre_ids):
-                            raise ValueError(
-                                "One or more genres do not exist.")
                         row['genre'] = genres
 
                     if 'author' in row:
