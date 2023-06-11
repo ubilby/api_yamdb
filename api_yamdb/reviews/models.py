@@ -98,7 +98,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.IntegerField(validators=(validate_year,))
+    year = models.PositiveSmallIntegerField(validators=(validate_year,))
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(
         Category,
@@ -124,58 +124,6 @@ class Title(models.Model):
         return self.name
 
 
-class Review(models.Model):
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Отзыв',
-    )
-    author = models.ForeignKey(
-        MyUser,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор',
-    )
-    text = models.TextField(
-        'Текст отзыва',
-        help_text='Введите отзыв',
-    )
-    pub_date = models.DateTimeField(
-        'Дата публикации отзыва',
-        auto_now_add=True,
-    )
-    score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
-    )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.title.rating:
-            self.title.rating.update_average_score()
-        else:
-            self.title.rating = Rating.objects.create(
-                title=self.title,
-                average_score=self.score
-            )
-
-    def delete(self, *args, **kwargs):
-        self.title.rating.update_average_score()
-        super().delete(*args, **kwargs)
-
-    class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-        ordering = ('-pub_date',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=['title', 'author'], name='unique_title_author')
-        ]
-
-    def __str__(self):
-        return self.text
-
-
 class Rating(models.Model):
     title = models.OneToOneField(
         Title,
@@ -184,8 +132,9 @@ class Rating(models.Model):
         null=True,
         blank=True
     )
-    average_score = models.IntegerField(
-        null=True
+    average_score = models.PositiveSmallIntegerField(
+        null=True,
+        default=None
     )
 
     def __str__(self):
@@ -199,27 +148,69 @@ class Rating(models.Model):
         if reviews:
             total_score = sum(review.score for review in reviews)
             self.average_score = round(total_score / len(reviews))
-        else:
-            self.average_score = 0
         self.save()
 
 
-class Comment(models.Model):
+class ReviewCommentBase(models.Model):
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE, related_name='comments'
-    )
-    review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
+        'MyUser',
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
     )
     text = models.TextField()
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True
+        'Дата добавления',
+        auto_now_add=True,
+        db_index=True,
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text
+
+
+class Review(ReviewCommentBase):
+    title = models.ForeignKey(
+        'Title',
+        on_delete=models.CASCADE,
+        verbose_name='Отзыв',
+    )
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+
+    def save(self, *args, **kwargs):
+        if self.title.rating:
+            self.title.rating.update_average_score()
+        else:
+            self.title.rating = Rating.objects.create(
+                title=self.title,
+                average_score=self.score
+            )
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        default_related_name = 'reviews'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_title_author'
+            )
+        ]
+
+
+class Comment(ReviewCommentBase):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ('-pub_date',)
-
-    def __str__(self):
-        return self.text
+        default_related_name = 'comments'
