@@ -20,7 +20,7 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **options):
-        for file, model in self.files_models.items():
+        for file_, model in self.files_models.items():
             path = os.path.realpath(
                 f'/Users/ubilby/codes/python/ya_practicum/sprint_10/api_yamdb/api_yamdb/static/data/{file}'
             )

@@ -26,17 +26,6 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **options):
-        # path = os.path.realpath(
-        #     '.\\static\\data\\titles.csv'
-        # )
-        # with open(path, 'r', encoding="utf-8") as f:
-        #     reader = csv.DictReader(f, delimiter=',')
-        #     for row in reader:
-        #         print(row)
-        #         form = TitleForm(row)
-        #         print(form.errors)
-        #         form.save
-
         for file_, model in self.files_models.items():
             path = os.path.realpath(
                 f'./static/data/{file_}'
