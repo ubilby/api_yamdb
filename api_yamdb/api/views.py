@@ -13,12 +13,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, MyUser, Rating, Review, Title
+
+from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
 from .mixins import MultiMixin
-from .permissions import (IsAdmin, IsAdminOrReadOnly,
-                          IsAuthorOrModeratorOrAdmin)
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -131,14 +131,6 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitleReadSerializer
         return TitleWriteSerializer
 
-    def perform_create(self, serializer):
-        title = serializer.save()
-        Rating.objects.create(title=title)
-        return Response(
-            {'title': TitleReadSerializer(title).data},
-            status=status.HTTP_201_CREATED
-        )
-
 
 class CategoryViewSet(MultiMixin):
     queryset = Category.objects.all()
@@ -177,7 +169,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = Review.objects.filter(title_id=self.kwargs.get('title_id'))
-        return review.all()
+        return review.order_by('-pub_date')
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -186,7 +178,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
-        return review.comments.all()
+        return review.comments.order_by('-pub_date')
 
     def perform_create(self, serializer):
         serializer.save(

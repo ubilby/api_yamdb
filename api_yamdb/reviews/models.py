@@ -1,14 +1,15 @@
-import re
-
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import validate_year
+from .validators import username_validator, validate_year
 
 
 class MyUser(AbstractUser):
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['email']
+
     ROLE_USER = 'user'
     ROLE_MODERATOR = 'moderator'
     ROLE_ADMIN = 'admin'
@@ -18,11 +19,6 @@ class MyUser(AbstractUser):
         (ROLE_MODERATOR, 'moderator'),
         (ROLE_ADMIN, 'admin'),
     )
-
-    def username_validator(value):
-        pattern = r'^[\w.@+-]+\Z'
-        if re.match(pattern, value) is None:
-            raise ValidationError('error')
 
     username = models.CharField(
         max_length=150,
@@ -43,10 +39,6 @@ class MyUser(AbstractUser):
         blank=True,
         null=True
     )
-
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
 
     class Meta:
         verbose_name = 'Юзверь'
@@ -72,45 +64,47 @@ class MyUser(AbstractUser):
         return self.username
 
 
-class Category(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
-
-    class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
-
-    def __str__(self):
-        return self.name
-
-
-class Genre(models.Model):
+class AbstractModelCG(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
+        ordering = ("name",)
+        abstract = True
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Category(AbstractModelCG):
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        default_related_name = 'categorys'
+
+
+class Genre(AbstractModelCG):
+
+    class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-
-    def __str__(self):
-        return self.name
+        default_related_name = 'generes'
 
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.IntegerField(validators=(validate_year,))
+    year = models.PositiveSmallIntegerField(validators=(validate_year,))
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
-        related_name='titles',
         verbose_name='Категория',
         null=True,
         blank=True,
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='titles',
         verbose_name='Жанр',
         blank=True,
     )
@@ -118,85 +112,23 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        default_related_name = 'titles'
         ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name
 
 
-class ReviewManager(models.Manager):
-    def create(self, **kwargs):
-        title = kwargs.get('title')
-        author = kwargs.get('author')
-        if title and author:
-            if self.filter(title=title, author=author).exists():
-                return None
-        return super().create(**kwargs)
-
-
-class Review(models.Model):
-    objects = ReviewManager()
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Отзыв',
-    )
-    author = models.ForeignKey(
-        MyUser,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор',
-    )
-    text = models.TextField(
-        'Текст отзыва',
-        help_text='Введите отзыв',
-    )
-    pub_date = models.DateTimeField(
-        'Дата публикации отзыва',
-        auto_now_add=True,
-    )
-    score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
-    )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.title.rating:
-            self.title.rating.update_average_score()
-        else:
-            self.title.rating = Rating.objects.create(
-                title=self.title,
-                average_score=self.score
-            )
-
-    def delete(self, *args, **kwargs):
-        self.title.rating.update_average_score()
-        super().delete(*args, **kwargs)
-
-    class Meta:
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-        ordering = ('-pub_date',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=['title', 'author'], name='unique_title_author')
-        ]
-
-    def __str__(self):
-        return self.text
-
-
 class Rating(models.Model):
     title = models.OneToOneField(
         Title,
         on_delete=models.CASCADE,
-        related_name='rating',
         null=True,
         blank=True
     )
-    average_score = models.IntegerField(
-        null=True
+    average_score = models.PositiveSmallIntegerField(
+        null=True,
+        default=None
     )
 
     def __str__(self):
@@ -210,27 +142,74 @@ class Rating(models.Model):
         if reviews:
             total_score = sum(review.score for review in reviews)
             self.average_score = round(total_score / len(reviews))
-        else:
-            self.average_score = 0
         self.save()
 
+    class Meta:
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'
+        default_related_name = 'rating'
 
-class Comment(models.Model):
+
+class ReviewCommentBase(models.Model):
     author = models.ForeignKey(
-        MyUser, on_delete=models.CASCADE, related_name='comments'
-    )
-    review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
+        'MyUser',
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
     )
     text = models.TextField()
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True
+        'Дата добавления',
+        auto_now_add=True,
+        db_index=True,
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text
+
+
+class Review(ReviewCommentBase):
+    title = models.ForeignKey(
+        'Title',
+        on_delete=models.CASCADE,
+        verbose_name='Отзыв',
+    )
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+
+    def save(self, *args, **kwargs):
+        if hasattr(self.title, 'rating'):
+            self.title.rating.update_average_score()
+        else:
+            self.title.rating = Rating.objects.create(
+                title=self.title,
+                average_score=self.score
+            )
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        default_related_name = 'reviews'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_title_author'
+            )
+        ]
+
+
+class Comment(ReviewCommentBase):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
     )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ('-pub_date',)
-
-    def __str__(self):
-        return self.text
+        default_related_name = 'comments'
