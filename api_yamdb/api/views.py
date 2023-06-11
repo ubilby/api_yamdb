@@ -17,8 +17,7 @@ from reviews.models import Category, Genre, MyUser, Rating, Review, Title
 
 from .filters import TitlesFilter
 from .mixins import MultiMixin
-from .permissions import (IsAdmin, IsAdminOrReadOnly,
-                          IsAuthorOrModeratorOrAdmin)
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
