@@ -2,15 +2,15 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand
+# from reviews.models import(
+#   MyUser, Category, Genre, Review, Comment, Title, Rating)
+from reviews.forms import (CategoryForm, CommentForm, GenreForm, MyUserForm,
+                           ReviewForm, TitleForm)
+
 # from django.forms import ValidationError
 # from django.db.utils import IntegrityError
 # from django.core.exceptions import ObjectDoesNotExist
 
-# from reviews.models import(
-#   MyUser, Category, Genre, Review, Comment, Title, Rating)
-from reviews.forms import (
-    MyUserForm, TitleForm, CommentForm, ReviewForm, CategoryForm, GenreForm
-)
 
 
 class Command(BaseCommand):
