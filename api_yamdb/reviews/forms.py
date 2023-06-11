@@ -11,7 +11,14 @@ class TitleForm(ModelForm):
 class MyUserForm(ModelForm):
     class Meta:
         model = MyUser
-        fields = ('__all__')
+        fields = (
+            'id',
+            'username',
+            'email',
+            'role',
+            'first_name',
+            'last_name',
+        )
 
 
 class GenreForm(ModelForm):
