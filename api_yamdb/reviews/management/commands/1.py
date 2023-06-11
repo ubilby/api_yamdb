@@ -39,13 +39,13 @@ class Command(BaseCommand):
 
         for file_, model in self.files_models.items():
             path = os.path.realpath(
-                f'/Users/ubilby/codes/python/ya_practicum/sprint_10/api_yamdb/api_yamdb/static/data/{file}'
+                f'./static/data/{file_}'
             )
             print(f'{file_} - {model}')  # тестовый принт имён файла и модели
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
                 for row in reader:
-                    print(row)
+                    # print(row)
                     form = model(row)
                     print(form.errors)
                     new_id = form.save(commit=False)
