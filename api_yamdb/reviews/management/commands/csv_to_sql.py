@@ -8,8 +8,6 @@ from reviews.models import Category, Comment, Genre, MyUser, Review, Title
 
 
 class Command(BaseCommand):
-    help = 'Imports data from CSV files to DB'
-
     files_models = {
         'users.csv': MyUser,
         'category.csv': Category,
