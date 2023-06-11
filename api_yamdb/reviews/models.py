@@ -1,14 +1,15 @@
-import re
-
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import validate_year
+from .validators import validate_year, username_validator
 
 
 class MyUser(AbstractUser):
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['email']
+
     ROLE_USER = 'user'
     ROLE_MODERATOR = 'moderator'
     ROLE_ADMIN = 'admin'
@@ -18,11 +19,6 @@ class MyUser(AbstractUser):
         (ROLE_MODERATOR, 'moderator'),
         (ROLE_ADMIN, 'admin'),
     )
-
-    def username_validator(value):
-        pattern = r'^[\w.@+-]+\Z'
-        if re.match(pattern, value) is None:
-            raise ValidationError('error')
 
     username = models.CharField(
         max_length=150,
@@ -43,10 +39,6 @@ class MyUser(AbstractUser):
         blank=True,
         null=True
     )
-
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
 
     class Meta:
         verbose_name = 'Юзверь'
@@ -72,28 +64,29 @@ class MyUser(AbstractUser):
         return self.username
 
 
-class Category(models.Model):
-    name = models.CharField(max_length=256)
+class AbstractModelCG(models.Model):
+    name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Category(AbstractModelCG):
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-    def __str__(self):
-        return self.name
 
-
-class Genre(models.Model):
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=50, unique=True)
+class Genre(AbstractModelCG):
 
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-
-    def __str__(self):
-        return self.name
 
 
 class Title(models.Model):
