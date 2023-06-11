@@ -2,9 +2,9 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
 
-from reviews.models import MyUser, Category, Genre, Review, Comment, Title, Rating
+from api_yamdb.settings import BASE_DIR
+from reviews.models import Category, Comment, Genre, MyUser, Review, Title
 
 
 class Command(BaseCommand):
@@ -21,10 +21,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for file_, model in self.files_models.items():
-            path = os.path.realpath(
-                f'./static/data/{file_}'
-            )
-            print(f'{file_} - {model}')
+            path = os.path.join(BASE_DIR, 'static', 'data', file_)
+
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
                 for row in reader:

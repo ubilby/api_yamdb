@@ -13,12 +13,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, MyUser, Rating, Review, Title
+
+from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
 from .mixins import MultiMixin
-from .permissions import (IsAdmin, IsAdminOrReadOnly,
-                          IsAuthorOrModeratorOrAdmin)
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -130,14 +130,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('list', 'retrieve'):
             return TitleReadSerializer
         return TitleWriteSerializer
-
-    def perform_create(self, serializer):
-        title = serializer.save()
-        Rating.objects.create(title=title)
-        return Response(
-            {'title': TitleReadSerializer(title).data},
-            status=status.HTTP_201_CREATED
-        )
 
 
 class CategoryViewSet(MultiMixin):

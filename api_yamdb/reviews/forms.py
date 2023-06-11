@@ -1,5 +1,6 @@
 from django.forms import ModelForm
-from .models import Title, Genre, Category, Review, MyUser, Comment
+
+from .models import Category, Comment, Genre, MyUser, Review, Title
 
 
 class TitleForm(ModelForm):
