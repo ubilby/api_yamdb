@@ -3,119 +3,59 @@ import os
 
 from django.core.management.base import BaseCommand
 from django.forms import ValidationError
+from django.db.utils import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
-from reviews.forms import (
-    CategoryForm, GenreForm, TitleForm, CommentForm, ReviewForm, MyUserForm
-)
-# from reviews.models import MyUser, Category, Genre, Review, Comment, Title
+from reviews.models import MyUser, Category, Genre, Review, Comment, Title, Rating
 
 
 class Command(BaseCommand):
     help = 'Imports data from CSV files to DB'
 
-    files = (
-        'users.csv',
-        'category.csv',
-        'genre.csv',
-        'review.csv',
-        'titles.csv',
-        'comments.csv',
-    )
-    models = (
-        MyUserForm,
-        CategoryForm,
-        GenreForm,
-        ReviewForm,
-        TitleForm,
-        CommentForm,
-    )
     files_models = {
-        'users.csv': MyUserForm,
-        'category.csv': CategoryForm,
-        'genre.csv': GenreForm,
-        'review.csv': ReviewForm,
-        'titles.csv': TitleForm,
-        'comments.csv': CommentForm,
+        'users.csv': MyUser,
+        'category.csv': Category,
+        'genre.csv': Genre,
+        'titles.csv': Title,
+        'review.csv': Review,
+        'comments.csv': Comment,
     }
 
     def handle(self, *args, **options):
-        for file_, model in self.files_models.items():
+        for file, model in self.files_models.items():
             path = os.path.realpath(
-                f'.\\static\\data\\{file_}'
+                f'/Users/ubilby/codes/python/ya_practicum/sprint_10/api_yamdb/api_yamdb/static/data/{file}'
             )
-            print(f'{file_} - {model}')  # тестовый принт имён файла и модели
-            # a = 'a'  # музыкальная пауза
-            # input(a)  # для разглядывания строчки словаря
             with open(path, 'r', encoding="utf-8") as f:
                 reader = csv.DictReader(f, delimiter=',')
-                # data = reader(file_)
                 for row in reader:
-                    print(row)
-                    form = model(data=row)
-                    print(form.errors)
-                    # a = 'a'  # музыкальная пауза
-                    # input(a)  # для разглядывания строчки словаря
-                    if form.is_valid:
-                        form.save()
+                    try:
+                        if 'category' in row:
+                            category_id = int(row['category'])
+                            try:
+                                category = Category.objects.get(id=category_id)
+                            except ObjectDoesNotExist:
+                                raise ValueError(
+                                    f"Category with id {category_id} does not exist.")
+                            row['category'] = category
+
+                        if 'genre' in row:
+                            genre_ids = [
+                                int(g) for g in row['genre'].split(',')
+                            ]
+                            genres = Genre.objects.filter(id__in=genre_ids)
+                            if len(genres) != len(genre_ids):
+                                raise ValueError(
+                                    "One or more genres do not exist.")
+                            row['genre'] = genres
+
+                        if 'author' in row:
+                            author_id = int(row['author'])
+                            author = MyUser.objects.get(id=author_id)
+                            row['author'] = author
+
+                        record = model(**row)
+                    except IntegrityError as e:
+                        print(e)
                     else:
-                        print(form.errors)
-
-    # def csv_to_dict(self, file_name):
-    #     path = os.path.realpath(f'.\\static\\data\\{file_name}')
-    #     with open(path, 'r', encoding="utf-8") as f:
-    #         reader = csv.DictReader(f, delimiter=',')
-    #         return list(reader)
-
-    # def handle(self, *args, **options):
-    #     data = self.csv_to_dict('users.csv')
-    #     for row in data:
-    #         # form = MyUserForm(data=row)
-    #         # form.save()
-    #         MyUser.objects.create(data)
-
-    #     data = self.csv_to_dict('category.csv')
-    #     for row in data:
-    #         form = CategoryForm(data=row)
-    #         form.save()
-
-    #     data = self.csv_to_dict('genre.csv')
-    #     for row in data:
-    #         form = GenreForm(data=row)
-    #         form.save()
-
-    #     data = self.csv_to_dict('review.csv')
-    #     for row in data:
-    #         form = ReviewForm(data=row)
-    #         form.save()
-
-    #     data = self.csv_to_dict('titles.csv')
-    #     for row in data:
-    #         form = TitleForm(data=row)
-    #         form.save()
-
-    #     data = self.csv_to_dict('comments.csv')
-    #     for row in data:
-    #         form = CommentForm(data=row)
-    #         form.save()
-
-        # data = self.csv_to_dict('genre_title.csv')
-        # for row in data:
-        #     if row[0] != 'id':
-
-    # def main():
-    #     con = sqlite3.connect('api_yamdb/db.sqlite3')
-    #     cur = con.cursor
-    #     data = csv_to_dict('users.csv')
-    #     for dict_list in data:
-    #         cur.execute(
-    #             "INSERT INTO reviews_customuser VALUES "
-    #             " (:id, '', '', '', :email, :username, :first_name, "
-    #             " :last_name, '', :bio, '', :role)",
-    #             dict_list
-    #         )
-    #     data = csv_to_dict('genre.csv')
-    #     for dict_list in data:
-    #         cur.execute(
-    #             "INSERT INTO reviews_genre VALUES (:id, :name, :slug)",
-    #             dict_list
-    #         )
+                        record.save()

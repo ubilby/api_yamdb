@@ -81,6 +81,7 @@ class Category(AbstractModelCG):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        default_related_name = 'categorys'
 
 
 class Genre(AbstractModelCG):
@@ -88,6 +89,7 @@ class Genre(AbstractModelCG):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        default_related_name = 'generes'
 
 
 class Title(models.Model):
@@ -97,14 +99,12 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
-        related_name='titles',
         verbose_name='Категория',
         null=True,
         blank=True,
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='titles',
         verbose_name='Жанр',
         blank=True,
     )
@@ -112,6 +112,7 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        default_related_name = 'titles'
         ordering = ("name",)
 
     def __str__(self) -> str:
@@ -122,7 +123,6 @@ class Rating(models.Model):
     title = models.OneToOneField(
         Title,
         on_delete=models.CASCADE,
-        related_name='rating',
         null=True,
         blank=True
     )
@@ -143,6 +143,11 @@ class Rating(models.Model):
             total_score = sum(review.score for review in reviews)
             self.average_score = round(total_score / len(reviews))
         self.save()
+
+    class Meta:
+        verbose_name = 'Рейтинг'
+        verbose_name_plural = 'Рейтинги'
+        default_related_name = 'rating'
 
 
 class ReviewCommentBase(models.Model):
@@ -177,7 +182,7 @@ class Review(ReviewCommentBase):
     )
 
     def save(self, *args, **kwargs):
-        if self.title.rating:
+        if hasattr(self.title, 'rating'):
             self.title.rating.update_average_score()
         else:
             self.title.rating = Rating.objects.create(
