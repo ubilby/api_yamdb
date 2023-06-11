@@ -5,15 +5,7 @@ from .models import Title, Genre, Category, Review, MyUser, Comment
 class TitleForm(ModelForm):
     class Meta:
         model = Title
-        fields = (
-            'id',
-            'username',
-            'email',
-            'role',
-            'bio',
-            'first_name',
-            'last_name'
-        )
+        fields = ('__all__')
 
 
 class MyUserForm(ModelForm):
