@@ -16,7 +16,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
-from .mixins import MultiMixin
+from .mixins import MixinForCategoryAndGenre
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
@@ -131,7 +131,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
 
-class CategoryViewSet(MultiMixin):
+class CategoryViewSet(MixinForCategoryAndGenre):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     search_fields = ('name',)
@@ -141,7 +141,7 @@ class CategoryViewSet(MultiMixin):
     filter_backends = (SearchFilter, )
 
 
-class GenreViewSet(MultiMixin):
+class GenreViewSet(MixinForCategoryAndGenre):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (SearchFilter, )
