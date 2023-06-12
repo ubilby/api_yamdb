@@ -3,6 +3,8 @@ import re
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from reviews.models import Category, Comment, Genre, MyUser, Review, Title
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -21,10 +23,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(
-        read_only=True,
     )
     genre = GenreSerializer(
-        read_only=True,
         many=True,
     )
     rating = serializers.SlugRelatedField(
@@ -36,7 +36,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
-
+        read_only_fields = ('category', 'genre')
         search_fields = ('category', 'genre', 'name')
 
 
@@ -55,6 +55,12 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year',
                   'description', 'genre', 'category')
         model = Title
+
+    # def validate_year(self, creation_year):
+    #     if creation_year > timezone.now().year:
+    #         raise ValidationError(
+    #             f'Год не может быть больше {timezone.now().year}'
+    #         )
 
 
 class ReviewSerializer(serializers.ModelSerializer):

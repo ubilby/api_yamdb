@@ -69,7 +69,6 @@ class AbstractModelCG(models.Model):
     slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
-        ordering = ("name",)
         abstract = True
 
     def __str__(self) -> str:
@@ -82,6 +81,7 @@ class Category(AbstractModelCG):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
         default_related_name = 'categorys'
+        ordering = ("name",)
 
 
 class Genre(AbstractModelCG):
@@ -90,6 +90,7 @@ class Genre(AbstractModelCG):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
         default_related_name = 'generes'
+        ordering = ("name",)
 
 
 class Title(models.Model):
