@@ -56,11 +56,12 @@ class TitleWriteSerializer(serializers.ModelSerializer):
                   'description', 'genre', 'category')
         model = Title
 
-    # def validate_year(self, creation_year):
-    #     if creation_year > timezone.now().year:
-    #         raise ValidationError(
-    #             f'Год не может быть больше {timezone.now().year}'
-    #         )
+    def validate_year(self, creation_year):
+        if creation_year > timezone.now().year:
+            raise ValidationError(
+                f'Год не может быть больше {timezone.now().year}'
+            )
+        return creation_year
 
 
 class ReviewSerializer(serializers.ModelSerializer):

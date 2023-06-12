@@ -95,7 +95,9 @@ class Genre(AbstractModelCG):
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.PositiveSmallIntegerField(validators=(validate_year,))
+    year = models.PositiveSmallIntegerField(
+        null=False, validators=(validate_year,)
+    )
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(
         Category,
