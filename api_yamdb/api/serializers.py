@@ -144,7 +144,12 @@ class SignupSerializer(serializers.Serializer):
     def validate_username(self, value):
         pattern = r'^[\w.@+-]+\Z'
         if re.match(pattern, value) is None:
-            raise serializers.ValidationError('error!')
+            raise serializers.ValidationError(
+                'Имя содержит недопустимые символы.'
+            )
+        if MyUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Пользователь уже существует.')
+
         return value
 
 
