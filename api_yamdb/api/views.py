@@ -18,7 +18,7 @@ from reviews.models import Category, Genre, MyUser, Review, Title
 
 from .filters import TitlesFilter
 from .mixins import MultiMixin
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModeratorOrAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignupSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -154,7 +154,7 @@ class GenreViewSet(MultiMixin):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrModeratorOrAdmin, )
+    permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly, )
 
     def perform_create(self, serializer):
         author = self.request.user
@@ -174,7 +174,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrModeratorOrAdmin, )
+    permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly, )
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
