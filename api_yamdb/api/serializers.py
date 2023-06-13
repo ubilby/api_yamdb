@@ -63,6 +63,11 @@ class TitleWriteSerializer(serializers.ModelSerializer):
             )
         return creation_year
 
+    def validate_genre(self, genre):
+        if genre == []:
+            raise ValidationError('Жанр не может быть пустым')
+        return genre
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
