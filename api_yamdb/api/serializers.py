@@ -124,9 +124,6 @@ class UserSerializer(ModelSerializer):
         return value
 
     def validate_username(self, value):
-        # pattern = r'^[\w.@+-]+\Z'
-        # if re.match(pattern, value) is None:
-        #     raise serializers.ValidationError('error!')
         if MyUser.objects.filter(username=value).exists():
             raise serializers.ValidationError('error!')
         return username_validator(value)
