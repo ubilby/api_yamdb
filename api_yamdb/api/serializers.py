@@ -130,7 +130,7 @@ class UserSerializer(ModelSerializer):
         return value
 
 
-class SignupSerializer(serializers.ModelSerializer):
+class SignupSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254, required=True)
     username = serializers.RegexField(
         regex=r'^[\w.@+-]+\Z',
