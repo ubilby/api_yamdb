@@ -8,8 +8,6 @@ from api_yamdb.settings import BASE_DIR
 
 
 class Command(BaseCommand):
-    help = 'Imports data from CSV files to DB'
-
     files_models = {
         'users.csv': MyUser,
         'category.csv': Category,
