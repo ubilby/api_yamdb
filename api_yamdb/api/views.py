@@ -11,8 +11,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, MyUser, Review, Title
 
+from reviews.models import Category, Genre, MyUser, Review, Title
 from .filters import TitlesFilter
 from .mixins import MixinForCategoryAndGenre
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -120,10 +120,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly, )
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         serializer.save(
             author=self.request.user,
-            title=title
+            title=get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         )
 
     def get_queryset(self):
