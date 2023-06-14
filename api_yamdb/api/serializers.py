@@ -1,9 +1,9 @@
-from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
-from reviews.models import Category, Comment, Genre, MyUser, Review, Title
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
+from reviews.models import Category, Comment, Genre, MyUser, Review, Title
 from reviews.validators import username_validator
 
 
@@ -85,6 +85,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         read_only_fields = ('title',)
 
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            title_id = self.context['view'].kwargs.get('title_id')
+            if Review.objects.filter(
+                author=self.context['request'].user,
+                title_id=title_id
+            ).exists():
+                raise ValidationError('У вас уже есть отзыв')
+        return data
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -123,7 +133,9 @@ class UserSerializer(ModelSerializer):
 
     def validate_username(self, value):
         if MyUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError('error!')
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует.'
+            )
         return username_validator(value)
 
 
