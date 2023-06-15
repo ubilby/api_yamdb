@@ -194,7 +194,7 @@ class Review(ReviewCommentBase):
             )
         super().save(*args, **kwargs)
 
-    class Meta:
+    class Meta(ReviewCommentBase.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         default_related_name = 'reviews'
@@ -212,7 +212,7 @@ class Comment(ReviewCommentBase):
         on_delete=models.CASCADE,
     )
 
-    class Meta:
+    class Meta(ReviewCommentBase.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         default_related_name = 'comments'
