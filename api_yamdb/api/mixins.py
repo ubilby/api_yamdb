@@ -1,7 +1,7 @@
 from rest_framework import mixins, viewsets
 
 
-class MultiMixin(
+class MixinForCategoryAndGenre(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,

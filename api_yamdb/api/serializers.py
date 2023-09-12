@@ -1,8 +1,10 @@
-import re
-
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
+
 from reviews.models import Category, Comment, Genre, MyUser, Review, Title
+from reviews.validators import username_validator
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -21,10 +23,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(
-        read_only=True,
     )
     genre = GenreSerializer(
-        read_only=True,
         many=True,
     )
     rating = serializers.SlugRelatedField(
@@ -36,7 +36,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
-
+        read_only_fields = ('category', 'genre')
         search_fields = ('category', 'genre', 'name')
 
 
@@ -56,6 +56,18 @@ class TitleWriteSerializer(serializers.ModelSerializer):
                   'description', 'genre', 'category')
         model = Title
 
+    def validate_year(self, creation_year):
+        if creation_year > timezone.now().year:
+            raise ValidationError(
+                f'Год не может быть больше {timezone.now().year}'
+            )
+        return creation_year
+
+    def validate_genre(self, genre):
+        if genre == []:
+            raise ValidationError('Жанр не может быть пустым')
+        return genre
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -72,6 +84,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         )
         model = Review
         read_only_fields = ('title',)
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            title_id = self.context['view'].kwargs.get('title_id')
+            if Review.objects.filter(
+                author=self.context['request'].user,
+                title_id=title_id
+            ).exists():
+                raise ValidationError('У вас уже есть отзыв')
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -110,15 +132,14 @@ class UserSerializer(ModelSerializer):
         return value
 
     def validate_username(self, value):
-        pattern = r'^[\w.@+-]+\Z'
-        if re.match(pattern, value) is None:
-            raise serializers.ValidationError('error!')
         if MyUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError('error!')
-        return value
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует.'
+            )
+        return username_validator(value)
 
 
-class SignupSerializer(serializers.ModelSerializer):
+class SignupSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254, required=True)
     username = serializers.RegexField(
         regex=r'^[\w.@+-]+\Z',
@@ -130,10 +151,7 @@ class SignupSerializer(serializers.ModelSerializer):
         model = MyUser
 
     def validate_username(self, value):
-        pattern = r'^[\w.@+-]+\Z'
-        if re.match(pattern, value) is None:
-            raise serializers.ValidationError('error!')
-        return value
+        return username_validator(value)
 
 
 class TokenSerializer(serializers.Serializer):

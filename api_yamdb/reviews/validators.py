@@ -1,4 +1,5 @@
 import re
+
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -11,8 +12,11 @@ def validate_year(creation_year):
 
 
 def username_validator(value):
-    pattern = r'^[\w.@+-]+\Z'
-    if re.match(pattern, value) is None:
+    unmatched = re.sub(r'^[\w.@+-]+\Z', '', value)
+    if value == "me":
+        raise ValidationError('Имя пользователя "me" использовать нельзя!')
+    elif value in unmatched:
         raise ValidationError(
-            'Имя пользователя содержит недопустимые символы.'
+            f"Имя пользователя не должно содержать {unmatched}"
         )
+    return value
